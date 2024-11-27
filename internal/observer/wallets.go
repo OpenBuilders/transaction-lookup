@@ -26,14 +26,14 @@ func (o *Observer) startRedisEventsHandler(ctx context.Context) {
 		case message := <-pubsub.Channel():
 			switch message.Channel {
 			case RedisChannelExpired:
-				log.Printf("wallet expired: %s\n", message.Payload)
+				// log.Printf("wallet expired: %s\n", message.Payload)
 				wallet, err := getWalletAddressFromMessage(message)
 				if err != nil {
 					log.Printf("received bad message \"%s\" in %s: %v\n", message.Payload, RedisChannelExpired, err)
 				}
 				o.delWallet(wallet)
 			case RedisChannelNewExpire:
-				log.Printf("new wallet set: %s\n", message.Payload)
+				// log.Printf("new wallet set: %s\n", message.Payload)
 				wallet, err := getWalletAddressFromMessage(message)
 				if err != nil {
 					log.Printf("received bad message \"%s\" in %s: %v\n", message.Payload, RedisChannelExpired, err)

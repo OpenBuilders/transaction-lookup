@@ -122,8 +122,7 @@ func (o *Observer) shardHandleWorker(ctx context.Context, idx int) {
 			continue
 		}
 		for _, blockTX := range blockTXs {
-			isWalletExists := o.isWalletExists(WalletAddress(blockTX.Account))
-			if !isWalletExists {
+			if !o.isWalletExists(WalletAddress(blockTX.Account)) {
 				continue
 			}
 			o.noticedWallets <- WalletAddress(blockTX.Account)

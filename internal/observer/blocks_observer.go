@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"sync"
+	"time"
 	"transaction-lookup/internal/buffer"
 
 	"github.com/redis/go-redis/v9"
@@ -12,6 +13,7 @@ import (
 
 const (
 	GetMasterShardsAttemptsLimit = 5
+	GetShardsTXsLimit            = 5
 	ShardsHandlerLimit           = 10
 )
 
@@ -53,6 +55,7 @@ func (o *Observer) startMasterObserver(ctx context.Context) {
 			log.Println("master-blocks observer stopped")
 			return
 		default:
+			time.Sleep(time.Millisecond * 500)
 			currentMaster, err := o.api.GetMasterchainInfo(ctx)
 			if err != nil {
 				log.Printf("failed to get current master block: %v\n", err)
@@ -119,6 +122,7 @@ func (o *Observer) shardHandleWorker(ctx context.Context, idx int) {
 	for shardBlock := range o.shardBlocks {
 		blockTXs, err := o.GetTransactionIDsFromBlock(ctx, shardBlock)
 		if err != nil {
+			log.Printf("failed to get block (%d,%d,%d) transactions: %v\n", shardBlock.Workchain, shardBlock.Shard, shardBlock.SeqNo, err)
 			continue
 		}
 		for _, blockTX := range blockTXs {
@@ -141,9 +145,11 @@ func (o *Observer) shardHandleWorker(ctx context.Context, idx int) {
 }
 
 func (o *Observer) Start(ctx context.Context, wg *sync.WaitGroup) error {
+	log.Println("loading redis wallets in memory...")
 	if err := o.loadWallets(ctx); err != nil {
 		return err
 	}
+	log.Println("loading done")
 
 	wg.Add(5)
 	go func() {

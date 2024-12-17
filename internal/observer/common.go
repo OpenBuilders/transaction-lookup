@@ -22,7 +22,12 @@ func (o *Observer) GetTransactionIDsFromBlock(ctx context.Context, blockID *ton.
 			if attempts == GetShardsTXsLimit {
 				return nil, err // Retries limit exceeded for batch
 			}
-			log.Printf("failed to get block (%d,%d,%d) transactions batch %d: %v\n", blockID.Workchain, blockID.Shard, blockID.SeqNo, after.LT, err)
+
+			logAfter := uint64(0)
+			if after != nil {
+				logAfter = after.LT
+			}
+			log.Printf("failed to get block (%d,%d,%d) transactions batch %d: %v\n", blockID.Workchain, blockID.Shard, blockID.SeqNo, logAfter, err)
 			continue
 		}
 		txIDList = append(txIDList, fetchedIDs...)

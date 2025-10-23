@@ -20,10 +20,13 @@ Set these environment variables
 |Name of variable|Value|
 |:---------------|:---:|
 |Redis variables||
-|`REDIS_HOST`|hostname:port|
+|`REDIS_HOST`|ip/hostname|
+|`REDIS_PORT`|port|
 |`REDIS_USER`|username|
 |`REDIS_PASS`|password|
 |`REDIS_DB`|db index, default - **0**|
+|`REDIS_ENABLE_TLS`|is tls enabled on redis server, default - **false**|
+|`REDIS_MIN_TLS_VERSION`|tls version const, check crypto/tls package|
 |Liteserver variables||
 |`LITESERVER_HOST`|ip:port|
 |`LITESERVER_KEY`|key|

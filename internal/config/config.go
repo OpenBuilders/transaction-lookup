@@ -13,6 +13,8 @@ var (
 )
 
 type Config struct {
+	LogLevel string `env:"LOG_LEVEL" env-default:"INFO"`
+
 	IsTestnet bool `env:"IS_TESTNET" env-default:"false"`
 	Public    bool `env:"IS_PUBLIC" env-default:"true"`
 

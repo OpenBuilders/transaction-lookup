@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"transaction-lookup/internal/config"
 	"transaction-lookup/internal/liteclient"
+	"transaction-lookup/internal/log"
 	"transaction-lookup/internal/observer"
 	"transaction-lookup/internal/redis"
 )
@@ -21,6 +22,8 @@ func main() {
 		slog.Error("failed to load config", "error", err)
 		return
 	}
+
+	log.Setup(cfg.LogLevel)
 
 	slog.Info("initializing redis client...")
 	rdb, err := redis.NewClient(cfg.RedisConfig)

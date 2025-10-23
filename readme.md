@@ -19,6 +19,7 @@ A Go-based service designed to monitor wallet activity in real-time, providing n
 Set these environment variables
 |Name of variable|Value|
 |:---------------|:---:|
+|`LOG_LEVEL`|uppercase logs level|
 |Redis variables||
 |`REDIS_HOST`|ip/hostname|
 |`REDIS_PORT`|port|

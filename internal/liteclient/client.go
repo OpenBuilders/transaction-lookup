@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sort"
+	"strings"
 	"time"
 
 	"transaction-lookup/internal/liteclient/config"
@@ -16,6 +17,9 @@ import (
 )
 
 const (
+	ErrBlockNotApplied = "block is not applied"
+	ErrBlockNotInDB    = "code 651"
+
 	GetShardsTXsLimit = 5
 )
 
@@ -62,8 +66,13 @@ func (c *client) GetTransactionIDsFromBlock(ctx context.Context, blockID *ton.Bl
 		attempts = 0
 	)
 	for next {
-		fetchedIDs, more, err := c.api.WithRetry().GetBlockTransactionsV2(ctx, blockID, 256, after)
+		fetchedIDs, more, err := c.GetBlockTransactionsV2(ctx, blockID, 256, after)
 		if err != nil {
+			if IsNotReadyError(err) {
+				time.Sleep(time.Millisecond * 100)
+				continue
+			}
+
 			attempts += 1
 			if attempts == GetShardsTXsLimit {
 				return nil, err // Retries limit exceeded for batch
@@ -89,8 +98,15 @@ func (c *client) GetTransactionIDsFromBlock(ctx context.Context, blockID *ton.Bl
 	return txIDList, nil
 }
 
-func (c *client) GetMasterchainInfo(ctx context.Context) (*ton.BlockIDExt, error) {
-	return c.api.WithRetry().CurrentMasterchainInfo(ctx)
+func (c *client) GetBlockTransactionsV2(ctx context.Context, block *ton.BlockIDExt, count uint32, after ...*ton.TransactionID3) ([]ton.TransactionShortInfo, bool, error) {
+	return c.api.WithRetry().GetBlockTransactionsV2(ctx, block, count, after...)
+}
+
+func (c *client) GetMasterchainInfo(ctx context.Context, timeout time.Duration) (*ton.BlockIDExt, error) {
+	if timeout == 0 {
+		timeout = 3 * time.Second
+	}
+	return c.api.WithTimeout(timeout).WithRetry().CurrentMasterchainInfo(ctx)
 }
 
 func (c *client) GetBlockShardsInfo(ctx context.Context, master *ton.BlockIDExt) ([]*ton.BlockIDExt, error) {
@@ -106,4 +122,12 @@ func (c *client) LookupBlock(ctx context.Context, timeout time.Duration, workcha
 		timeout = 3 * time.Second
 	}
 	return c.api.WithTimeout(timeout).WithRetry().LookupBlock(ctx, workchain, shard, seqno)
+}
+
+func (c *client) GetBlockData(ctx context.Context, block *ton.BlockIDExt) (*tlb.Block, error) {
+	return c.api.WithRetry().GetBlockData(ctx, block)
+}
+
+func IsNotReadyError(err error) bool {
+	return strings.Contains(err.Error(), ErrBlockNotApplied) || strings.Contains(err.Error(), ErrBlockNotInDB)
 }

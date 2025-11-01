@@ -21,6 +21,10 @@ start_infra:
 stop_infra:
 	docker compose down
 
+#? test: Run the tests.
+test:
+	go test -v ./internal/... ./cmd/...
+	
 #? help: Get more info on make commands.
 help: Makefile
 	@echo ''

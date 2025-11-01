@@ -1,5 +1,5 @@
 # Transactions Observer
-A Go-based service designed to monitor wallet activity in real-time, providing notifications for new transactions as they occur. This functionality enables seamless tracking of wallet activity and ensures that metadata updates are triggered only when necessary, optimizing efficiency and responsiveness.
+A Go-based service designed to monitor wallet activity in real-time, providing notifications for new transactions as they occur. This functionality enables seamless tracking of wallet activity and ensures that metadata updates are triggered only when necessary, optimizing efficiency and responsiveness.  
 ### Key points:
 - All observed wallets are stored as keys with TTL in Redis.
 - These keys must be **raw TON addresses** or they won't be added into memory.

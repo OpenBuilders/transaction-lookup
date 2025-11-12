@@ -17,8 +17,9 @@ import (
 )
 
 const (
-	ErrBlockNotApplied = "block is not applied"
-	ErrBlockNotInDB    = "code 651"
+	ErrBlockNotApplied    = "block is not applied"
+	ErrBlockNotInDB       = "code 651"
+	ErrBackendNodeTimeout = "code 502"
 
 	GetShardsTXsLimit = 5
 )
@@ -68,7 +69,8 @@ func (c *client) GetTransactionIDsFromBlock(ctx context.Context, blockID *ton.Bl
 	for next {
 		fetchedIDs, more, err := c.GetBlockTransactionsV2(ctx, blockID, 256, after)
 		if err != nil {
-			if IsNotReadyError(err) {
+			if IsNotReadyError(err) || IsTimeoutError(err) {
+				slog.Warn("failed to get block transactions batch, retrying...", "error", err, "workchain", blockID.Workchain, "shard", blockID.Shard, "seqno", blockID.SeqNo, "logAfter", logAfter)
 				time.Sleep(time.Millisecond * 100)
 				continue
 			}
@@ -130,4 +132,8 @@ func (c *client) GetBlockData(ctx context.Context, block *ton.BlockIDExt) (*tlb.
 
 func IsNotReadyError(err error) bool {
 	return strings.Contains(err.Error(), ErrBlockNotApplied) || strings.Contains(err.Error(), ErrBlockNotInDB)
+}
+
+func IsTimeoutError(err error) bool {
+	return strings.Contains(err.Error(), ErrBackendNodeTimeout)
 }

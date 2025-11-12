@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	expectedResponseListEmptyError = errors.New("expected response list is empty")
+	errExpectedResponseListEmpty = errors.New("expected response list is empty")
 )
 
 type MockLiteclient struct {
@@ -43,7 +43,7 @@ func (m *MockLiteclient) GetTransaction(ctx context.Context, block *ton.BlockIDE
 }
 func (m *MockLiteclient) GetBlockData(ctx context.Context, block *ton.BlockIDExt) (*tlb.Block, error) {
 	if len(m.responseList) == 0 {
-		return nil, expectedResponseListEmptyError
+		return nil, errExpectedResponseListEmpty
 	}
 
 	if m.responseList[0] == nil {
@@ -175,7 +175,7 @@ func TestHandleShardBlock(t *testing.T) {
 			want: shardStack{
 				&ton.BlockIDExt{Workchain: 0, Shard: 0x2000000000000000, SeqNo: 2},
 			},
-			wantError: expectedResponseListEmptyError,
+			wantError: errExpectedResponseListEmpty,
 		},
 	}
 

@@ -259,10 +259,10 @@ func (o *observer) startShardsHandler(ctx context.Context) {
 
 func (o *observer) shardHandleWorker(ctx context.Context, idx int) {
 	for shardBlock := range o.shardBlocks {
-		slog.Debug("handling new shard", "workchain", shardBlock.Workchain, "shard", shardBlock.Shard, "seqno", shardBlock.SeqNo)
+		slog.Debug("handling new shard", "workchain", shardBlock.Workchain, "shard", shardFriendlyName(shardBlock.Shard), "seqno", shardBlock.SeqNo)
 		blockTXs, err := o.lt.GetTransactionIDsFromBlock(ctx, shardBlock)
 		if err != nil {
-			slog.Error("failed to get block transactions", "workchain", shardBlock.Workchain, "shard", shardBlock.Shard, "seqno", shardBlock.SeqNo, "error", err)
+			slog.Error("failed to get block transactions", "workchain", shardBlock.Workchain, "shard", shardFriendlyName(shardBlock.Shard), "seqno", shardBlock.SeqNo, "error", err)
 			continue
 		}
 		for _, blockTX := range blockTXs {
@@ -275,7 +275,7 @@ func (o *observer) shardHandleWorker(ctx context.Context, idx int) {
 				"address", address.NewAddress(0, 0, blockTX.Account).String(),
 				"lt", blockTX.LT,
 				"workchain", shardBlock.Workchain,
-				"shard", shardBlock.Shard,
+				"shard", shardFriendlyName(shardBlock.Shard),
 				"seqno", shardBlock.SeqNo,
 			)
 		}

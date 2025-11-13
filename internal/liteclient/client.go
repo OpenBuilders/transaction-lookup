@@ -69,8 +69,11 @@ func (c *client) GetTransactionIDsFromBlock(ctx context.Context, blockID *ton.Bl
 	for next {
 		fetchedIDs, more, err := c.GetBlockTransactionsV2(ctx, blockID, 256, after)
 		if err != nil {
-			if IsNotReadyError(err) || IsTimeoutError(err) {
-				slog.Warn("failed to get block transactions batch, retrying...", "error", err, "workchain", blockID.Workchain, "shard", blockID.Shard, "seqno", blockID.SeqNo, "logAfter", logAfter)
+			logAfter := uint64(0)
+			if after != nil {
+				logAfter = after.LT
+			}
+			if IsNotReadyError(err) {
 				time.Sleep(time.Millisecond * 100)
 				continue
 			}
@@ -78,11 +81,6 @@ func (c *client) GetTransactionIDsFromBlock(ctx context.Context, blockID *ton.Bl
 			attempts += 1
 			if attempts == GetShardsTXsLimit {
 				return nil, err // Retries limit exceeded for batch
-			}
-
-			logAfter := uint64(0)
-			if after != nil {
-				logAfter = after.LT
 			}
 			slog.Error("failed to get block transactions batch", "workchain", blockID.Workchain, "shard", blockID.Shard, "seqno", blockID.SeqNo, "logAfter", logAfter, "error", err)
 			continue
@@ -132,8 +130,4 @@ func (c *client) GetBlockData(ctx context.Context, block *ton.BlockIDExt) (*tlb.
 
 func IsNotReadyError(err error) bool {
 	return strings.Contains(err.Error(), ErrBlockNotApplied) || strings.Contains(err.Error(), ErrBlockNotInDB)
-}
-
-func IsTimeoutError(err error) bool {
-	return strings.Contains(err.Error(), ErrBackendNodeTimeout)
 }

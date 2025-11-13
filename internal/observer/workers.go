@@ -151,8 +151,7 @@ func (o *observer) handleNewMaster(ctx context.Context, master *ton.BlockIDExt) 
 		// Getting from current master block all shards
 		var shards []*ton.BlockIDExt
 		if shards, err = o.lt.GetBlockShardsInfo(ctx, master); err != nil {
-			if lt.IsNotReadyError(err) || lt.IsTimeoutError(err) {
-				slog.Warn("failed to get shards, retrying...", "error", err, "workchain", master.Workchain, "shard", shardFriendlyName(master.Shard), "seqno", master.SeqNo)
+			if lt.IsNotReadyError(err) {
 				time.Sleep(time.Millisecond * 100)
 				continue
 			}
@@ -214,8 +213,7 @@ func (o *observer) handleShardBlock(ctx context.Context, shard *ton.BlockIDExt, 
 		// Get shard block data to serialize his parent blocks (1+)
 		var shardData *tlb.Block
 		if shardData, err = o.lt.GetBlockData(ctx, shard); err != nil {
-			if lt.IsNotReadyError(err) || lt.IsTimeoutError(err) {
-				slog.Warn("failed to get shard block data, retrying...", "error", err, "workchain", shard.Workchain, "shard", shardFriendlyName(shard.Shard), "seqno", shard.SeqNo)
+			if lt.IsNotReadyError(err) {
 				time.Sleep(time.Millisecond * 100)
 				continue
 			}
@@ -226,7 +224,7 @@ func (o *observer) handleShardBlock(ctx context.Context, shard *ton.BlockIDExt, 
 		}
 
 		var parents []*ton.BlockIDExt
-		if parents, err = shardData.BlockInfo.GetParentBlocks(); err != nil {
+		if parents, err = ton.GetParentBlocks(&shardData.BlockInfo); err != nil {
 			attempts += 1
 			continue
 		}

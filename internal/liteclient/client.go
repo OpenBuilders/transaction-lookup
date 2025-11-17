@@ -17,11 +17,10 @@ import (
 )
 
 const (
-	ErrBlockNotApplied    = "block is not applied"
-	ErrBlockNotInDB       = "code 651"
-	ErrBackendNodeTimeout = "code 502"
+	ErrBlockNotApplied = "block is not applied"
+	ErrBlockNotInDB    = "code 651"
 
-	GetShardsTXsLimit = 5
+	GetShardsTXsLimit = 10
 )
 
 type client struct {

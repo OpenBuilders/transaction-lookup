@@ -18,6 +18,6 @@ type Config struct {
 	IsTestnet bool `env:"IS_TESTNET" env-default:"false"`
 	Public    bool `env:"IS_PUBLIC" env-default:"true"`
 
-	RedisConfig      redisconfig.Config      `end-prefix:"REDIS_"`
-	LiteclientConfig liteclientconfig.Config `end-prefix:"LITESERVER_"`
+	RedisConfig      redisconfig.Config      `env-prefix:"REDIS_"`
+	LiteclientConfig liteclientconfig.Config `env-prefix:"LITESERVER_"`
 }
